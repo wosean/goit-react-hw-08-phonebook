@@ -1,35 +1,45 @@
-import React, { useEffect } from 'react';
-import { Wrap } from './ContactList.styled';
-import { useDispatch, useSelector } from 'react-redux';
-import Contact from 'components/Contact/Contact';
-import { fetchContacts } from 'redux/operations';
-import {
-  selectError,
-  selectIsLoading,
-  selectVisibleContacts,
-} from 'redux/selectors';
-import { nanoid } from '@reduxjs/toolkit';
+import { useSelector } from 'react-redux';
+import ContactItem from 'components/ContactItem/ContactItem';
+import { List } from './ContactList.styled';
+import { Container } from 'components/App.styled';
+import { selectIsLoggedIn } from 'redux/auth/authSelectors';
+import Filter from 'components/Filter/Filter';
+import { Navigate } from 'react-router-dom';
 
-export default function ContactList() {
-  const dispatch = useDispatch();
-  const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
-  const arrContacts = useSelector(selectVisibleContacts);
+const ContactList = () => {
+  const { items } = useSelector(state => state.contacts);
+  const { filter } = useSelector(state => state.filter);
+  const isLogedIn = useSelector(selectIsLoggedIn);
+  const getFilterContacts = () => {
+    if (filter === '') return items;
 
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
-  // console.log(arrContacts);
-  const showArr = Array.isArray(arrContacts) && arrContacts.length > 0;
+    return items.filter(({ name }) =>
+      name.toLowerCase().includes(filter.toLowerCase())
+    );
+  };
+
+  const filteredContacts = getFilterContacts();
 
   return (
-    <Wrap>
-      {isLoading && <p>Loading tasks...</p>}
-      {error && <p>{error}</p>}
-      {showArr &&
-        arrContacts.map(contact => {
-          return <Contact contact={contact} key={nanoid()} />;
-        })}
-    </Wrap>
+    <Container>
+      {isLogedIn ? (
+        <>
+          <Filter />
+          <List>
+            {filteredContacts.length > 0 ? (
+              filteredContacts.map(({ name, id, number }) => (
+                <ContactItem key={id} name={name} id={id} number={number} />
+              ))
+            ) : (
+              <h2>Empty...</h2> 
+            )}
+          </List>
+        </>
+      ) : (
+        <Navigate to="/login" replace />
+      )}
+    </Container>
   );
-}
+};
+
+export default ContactList;

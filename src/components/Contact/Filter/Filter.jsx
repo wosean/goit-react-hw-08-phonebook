@@ -1,6 +1,6 @@
 import { Input } from './Filter.styled';
 import { useSelector, useDispatch } from 'react-redux';
-import { setFilter } from 'redux/Contacts/contactFilter';
+import { setFilter } from 'redux/contactFilter';
 
 const Filter = () => {
   const { filter } = useSelector(state => state.filter);

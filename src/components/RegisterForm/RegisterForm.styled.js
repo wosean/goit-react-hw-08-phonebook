@@ -8,6 +8,7 @@ export const FormStyle = styled.form`
   gap: 1em;
   width: 400px;
   label {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -17,10 +18,22 @@ export const FormStyle = styled.form`
     margin-left: 0.5em;
   }
 
+  .password {
+    position: absolute;
+    font-size: 24px;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    bottom: 8px;
+    right: 8px;
+    cursor: pointer;
+  }
+
   input {
-
     padding: 0.3em 0.5em;
-
   }
 
   button {

@@ -1,45 +1,65 @@
-import {
-  Form,
-  MarkField,
-  ContactName,
-  ContactNumber,
-  BtnAdd,
-} from './ContactForm.styled';
+import * as yup from 'yup';
+
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/operations';
+import { addContact } from 'redux/Contacts/contactsOperetions';
+import { useForm } from 'react-hook-form';
+import { FormStyle } from './ContactForm.styled';
+import { Container } from 'components/App.styled';
+
+const schema = yup
+  .object({
+    name: yup.string().min(4).max(32).required(),
+    number: yup.string().min(6).max(16).required(),
+  })
+  .required();
 
 export default function ContactForm() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const { items } = useSelector(state => state.contacts);
+
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.items);
 
-  const handleSubmit = event => {
-    event.preventDefault();
-
-    const newUser = {
-      name: event.target.elements.name.value,
-      phone: event.target.elements.phone.value,
-    };
-
-    const hasContact = contacts.some(
-      contact => contact.name === event.target.elements.name.value
-    );
-    if (hasContact) {
-      alert(`${hasContact} is already in contacts`);
-      event.target.reset();
+  const onSubmit = data => {
+    if (items.find(({ name }) => name === data.name)) {
+      alert(`${data.name} is already in contacts`);
+      reset();
       return;
     }
-    dispatch(addContact(newUser));
-    event.target.reset();
+
+    dispatch(addContact(data));
+
+    reset();
   };
+
   return (
-    <div>
-      <Form onSubmit={handleSubmit}>
-        <MarkField>Name</MarkField>
-        <ContactName type="text" name="name" required />
-        <MarkField>Number</MarkField>
-        <ContactNumber type="tel" name="phone" required />
-        <BtnAdd type="submit">Add contact</BtnAdd>
-      </Form>
-    </div>
+    <Container>
+      <FormStyle onSubmit={handleSubmit(onSubmit)}>
+        <label>
+          <span>Contact name</span>
+          <input
+            type="text"
+            placeholder="Arnold Schwarzenegger"
+            {...register('name', { required: true })}
+          />
+          <span>{errors.name?.message}</span>
+        </label>
+        <label>
+          <span>Number</span>
+          <input type="text" placeholder="+012-345-67-89" {...register('number')} />
+          <span>{errors.number?.message}</span>
+        </label>
+        <button type="submit">
+          Add
+        </button>
+      </FormStyle>
+    </Container>
   );
 }
